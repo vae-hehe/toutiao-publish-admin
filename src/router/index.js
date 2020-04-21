@@ -7,19 +7,32 @@ import VueRouter from 'vue-router'
 // 注意: @后面就是src路径,后面 别忘了写/
 // 建议: 凡是需要路径查找的就使用@
 // 如果加在的资源在当前路径资源下,就在当前目录下,正常写
-import Login from '@/views/login'
+import Login from '@/views/login/'
+import Home from '@/views/home/'
+import Layout from '@/views/layout/'
 
 Vue.use(VueRouter)
 
 // 路由规则
 const routes = [
   {
-    path: '/',
-    redirect: '/login'
+    path: '/login',
+    name: 'login',
+    component: Login
   },
   {
-    path: '/login',
-    component: Login
+    path: '/',
+    // 命名路由有一个默认子路由.这个名字没有意义,警告
+    // 正确的做法: 如果默认子路由,就不要给父路由起名字了
+    // name: 'layout',
+    component: Layout,
+    children: [
+      {
+        path: '', // path为空,作为默认子路由渲染
+        name: 'home',
+        component: Home
+      }
+    ]
   }
 ]
 
