@@ -12,7 +12,7 @@ export const login = (data) => {
 
 // 获取用户信息
 export const getUserProfile = () => {
-  const user = JSON.parse(window.localStorage.getItem('user'))
+  // const user = JSON.parse(window.localStorage.getItem('user'))
   return request({
     method: 'GET',
     url: '/mp/v1_0/user/profile',
@@ -20,7 +20,7 @@ export const getUserProfile = () => {
     // 属性名和值都要看借口的要求
     // 属性名: Authorization,接口要求的
     // 属性值: Bearer空格token数据
-      Authorization: `Bearer ${user.token}`
+    // Authorization: `Bearer ${user.token}`
     }
   })
 }
