@@ -67,14 +67,4 @@ export default {
 .main{
     background-color: #e9eef3;
 }
-.avatar-wrap{
-    display: flex;
-    align-items: center;
-    .avatar{
-        width: 40px;
-        height: 50px;
-        border-radius: 40%;
-        margin-right: 10px;
-    }
-}
 </style>

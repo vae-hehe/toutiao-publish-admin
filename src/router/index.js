@@ -28,6 +28,7 @@ const routes = [
     component: Layout,
     children: [
       {
+        // 我们通常把 / 设置为网站的首页
         path: '', // path为空,作为默认子路由渲染
         name: 'home',
         component: Home

@@ -6,7 +6,7 @@
     </div>
     <el-dropdown>
         <div class="avatar-wrap">
-            <img src="aa" alt="" class="avatar">
+            <img class="avatar" :src="user.photo">
             <span>{{ user.name }}</span>
         </div>
     <el-dropdown-menu slot="dropdown">
@@ -56,5 +56,15 @@ export default {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ccc;
+}
+.avatar-wrap{
+    display: flex;
+    align-items: center;
+    .avatar{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
 }
 </style>

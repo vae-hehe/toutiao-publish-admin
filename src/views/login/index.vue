@@ -121,6 +121,11 @@ export default {
           // 关闭loading
           this.loginLoading = false
 
+          // 将接口返回的用户相关数据,存储到本地存储中,方便应用数据共享
+          // 本地存储只能存字符串
+          // 存数组格式,串成Json
+          window.localStorage.setItem('user', JSON.stringify(res.data.data))
+
           // 跳转到首页
           // this.$router.push('/')
 
