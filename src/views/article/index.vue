@@ -49,25 +49,61 @@
       根据筛选条件共查询到46147条
     </div>
     <!-- 数据列表 -->
+    <!-- Table表格组件
+        1. 把需要展示的数组列表数据绑定给table组件的
+        data属性
+          注意:不用v-for遍历,自己会遍历
+        2.设计el-table-column表格列 width可以设置表格列的宽度
+        lable设置表格列的标题
+        prop 设置要渲染的列表项的数据字段,只能展示文本
+        3. 表格列默认只能渲染普通文本,如果渲染其他内容,按钮标签之类的,要使用自定义模板 -->
     <el-table
-      :data="tableData"
+      :data="articles"
       stripe
       class="list-table"
       size="mini"
       style="width: 100%">
       <el-table-column
         prop="date"
-        label="日期"
-        width="180">
+        label="封面">
       </el-table-column>
       <el-table-column
-        prop="name"
-        label="姓名"
-        width="180">
+        prop="title"
+        label="标题">
+      </el-table-column>
+      <!-- 当有了自定义模板之后prop就没有用了  删掉 -->
+      <el-table-column
+        label="状态">
+        <!-- 在自定义模板中获取当前遍历的数据,在template中加上声明 slot-scope="scope" -->
+        <!-- 判断 是什么状态 使用v-if -->
+        <!-- slot-scope 固定的名字,scope 随便起的名字 -->
+        <!-- row是当前遍历项 -->
+        <template slot-scope="scope">
+          <el-tag type="warning" v-if="scope.row.status === 0">草稿</el-tag>
+          <el-tag v-else-if="scope.row.status === 1">待审核</el-tag>
+          <el-tag type="success"  v-else-if="scope.row.status === 2">审核通过</el-tag>
+          <el-tag type="info"  v-else-if="scope.row.status === 3">审核失败</el-tag>
+          <el-tag type="danger"  v-else-if="scope.row.status === 4">已删除</el-tag>
+        </template>
       </el-table-column>
       <el-table-column
-        prop="address"
-        label="地址">
+        prop="pubdate"
+        label="发表时间">
+      </el-table-column>
+      <el-table-column
+        label="操作">
+        <!-- 如果需要自定义表格列模板,就把需要的自定义内容放到
+        template中,不一定是按钮,可以是自定义的字符串的东西,
+        也可以使用图标,circle圆形 -->
+        <template>
+          <el-button
+          size="mini"
+          >编辑</el-button>
+          <el-button
+            size="mini"
+            type="danger"
+            >删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <!-- /数据列表 -->
@@ -83,6 +119,7 @@
 </template>
 
 <script>
+import { getArticles } from '@/api/article'
 export default {
   name: 'ArticleIndex',
   components: {},
@@ -99,30 +136,21 @@ export default {
         resource: '',
         desc: ''
       },
-      tableData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }]
+      articles: []
     }
   },
   computed: {},
   watch: {},
-  created () {},
+  created () {
+    this.loadArticles()
+  },
   mounted () {},
   methods: {
+    loadArticles () {
+      getArticles().then(res => {
+        this.articles = res.data.data.results
+      })
+    },
     onSubmit () {
       console.log('submit!')
     }
