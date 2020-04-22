@@ -10,6 +10,7 @@ import VueRouter from 'vue-router'
 import Login from '@/views/login/'
 import Home from '@/views/home/'
 import Layout from '@/views/layout/'
+import Article from '@/views/article/'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,12 @@ const routes = [
         path: '', // path为空,作为默认子路由渲染
         name: 'home',
         component: Home
+      },
+      {
+        // 我们通常把 / 设置为网站的首页
+        path: '/article', // path为空,作为默认子路由渲染
+        name: 'article',
+        component: Article
       }
     ]
   }
