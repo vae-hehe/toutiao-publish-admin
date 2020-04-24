@@ -64,8 +64,13 @@
       size="mini"
       style="width: 100%">
       <el-table-column
-        prop="date"
         label="封面">
+        <template slot-scope="scope">
+          <img
+            v-if="scope.row.cover.images[0]"
+            class="article-cover" :src="scope.row.cover.images[0]" alt="">
+          <!-- <img v-else class="article-cover" src="./no-cover.gif" alt=""> -->
+        </template>
       </el-table-column>
       <el-table-column
         prop="title"
@@ -79,11 +84,11 @@
         <!-- slot-scope 固定的名字,scope 随便起的名字 -->
         <!-- row是当前遍历项 -->
         <template slot-scope="scope">
-          <el-tag type="warning" v-if="scope.row.status === 0">草稿</el-tag>
-          <el-tag v-else-if="scope.row.status === 1">待审核</el-tag>
+          <el-tag :type="articleStatus[scope.row.status].type">{{ articleStatus[scope.row.status].text }}</el-tag>
+          <!-- <el-tag v-else-if="scope.row.status === 1">待审核</el-tag>
           <el-tag type="success"  v-else-if="scope.row.status === 2">审核通过</el-tag>
           <el-tag type="info"  v-else-if="scope.row.status === 3">审核失败</el-tag>
-          <el-tag type="danger"  v-else-if="scope.row.status === 4">已删除</el-tag>
+          <el-tag type="danger"  v-else-if="scope.row.status === 4">已删除</el-tag> -->
         </template>
       </el-table-column>
       <el-table-column
@@ -136,7 +141,14 @@ export default {
         resource: '',
         desc: ''
       },
-      articles: []
+      articles: [],
+      articleStatus: [
+        { status: 0, text: '草稿', type: '' },
+        { status: 1, text: '待审核', type: 'info' },
+        { status: 2, text: '审核通过', type: 'success' },
+        { status: 3, text: '审核失败', type: 'warning' },
+        { status: 4, text: '已删除', type: 'danger' }
+      ]
     }
   },
   computed: {},
@@ -164,5 +176,9 @@ export default {
 }
 .list-table{
   margin-bottom: 20px;
+}
+.article-cover{
+  width: 100px;
+  background-size: cover;
 }
 </style>
