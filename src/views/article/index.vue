@@ -116,7 +116,9 @@
     <el-pagination
       background
       layout="prev, pager, next"
-      :total="1000">
+      :total="1000"
+      @current-change="oncurrentchange"
+    >
     </el-pagination>
     <!-- /列表分页 -->
   </el-card>
@@ -158,13 +160,19 @@ export default {
   },
   mounted () {},
   methods: {
-    loadArticles () {
-      getArticles().then(res => {
+    loadArticles (page = 1) {
+      getArticles({
+        page,
+        per_page: 10
+      }).then(res => {
         this.articles = res.data.data.results
       })
     },
     onSubmit () {
       console.log('submit!')
+    },
+    oncurrentchange (page) {
+      this.loadArticles(page)
     }
   }
 }
