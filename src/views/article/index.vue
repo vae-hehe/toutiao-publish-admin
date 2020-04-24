@@ -113,12 +113,13 @@
     </el-table>
     <!-- /数据列表 -->
     <!-- 列表分页 -->
-    <!-- total设定总数据条数 -->
+    <!-- total设定总数据条数,默认按照10条处理 -->
     <el-pagination
       background
       layout="prev, pager, next"
       :total="totalCount"
       @current-change="oncurrentchange"
+      :page-size="pageSize"
     >
     </el-pagination>
     <!-- /列表分页 -->
@@ -152,7 +153,8 @@ export default {
         { status: 3, text: '审核失败', type: 'warning' },
         { status: 4, text: '已删除', type: 'danger' }
       ],
-      totalCount: 0// 总数据条数
+      totalCount: 0, // 总数据条数
+      pageSize: 20
     }
   },
   computed: {},
@@ -165,7 +167,7 @@ export default {
     loadArticles (page = 1) {
       getArticles({
         page,
-        per_page: 10
+        per_page: this.pageSize
       }).then(res => {
         const { results, total_count: totalCount } = res.data.data
         this.articles = results
