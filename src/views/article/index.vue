@@ -73,10 +73,20 @@
       <el-table-column
         label="封面">
         <template slot-scope="scope">
-          <img
+          <!-- 第一种方法显示没有图片的内容 -->
+          <!-- <img
             v-if="scope.row.cover.images[0]"
             class="article-cover" :src="scope.row.cover.images[0]" alt="">
-          <img v-else class="article-cover" src="./1.jpeg" alt="">
+          <img v-else class="article-cover" src="./1.jpeg" alt=""> -->
+          <!-- 第二种方法 -->
+          <el-image
+            style="width: 60px; height: 60px"
+            :src="scope.row.cover.images[0]"
+            :fit="fit">
+            <div slot="placeholder" class="image-slot">
+              加载中<span class="dot">...</span>
+            </div>
+          </el-image>
         </template>
       </el-table-column>
       <el-table-column
