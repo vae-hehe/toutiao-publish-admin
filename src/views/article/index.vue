@@ -82,7 +82,7 @@
           <el-image
             style="width: 60px; height: 60px"
             :src="scope.row.cover.images[0]"
-            :fit="fit">
+            fit="fit">
             <div slot="placeholder" class="image-slot">
               加载中<span class="dot">...</span>
             </div>
@@ -136,7 +136,7 @@
       background
       layout="prev, pager, next"
       :total="totalCount"
-      @current-change="oncurrentchange"
+      @current-change="loadArticles"
       :disabled="loading"
       :page-size="pageSize"
       :current-page.sync="page"
@@ -212,12 +212,11 @@ export default {
         this.loading = false
       })
     },
-    onSubmit () {
-      console.log('submit!')
-    },
-    oncurrentchange (page) {
-      this.loadArticles(page)
-    },
+    // 分页的函数, 也可以直接调用 loadArticles() 直接渲染
+    // @current-change="oncurrentchange" 修改成调用 loadArticles()
+    // oncurrentchange (page) {
+    //   this.loadArticles(page)
+    // },
     // 获取频道
     loadArticleChannels () {
       getArticleChannels().then(res => {
@@ -225,7 +224,7 @@ export default {
         this.channels = res.data.data.channels
       })
     },
-
+    // 删除数据
     onDeleteArticle (articleId) {
       // 找到数据接口
       // 封装请求方法
