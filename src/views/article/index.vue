@@ -118,8 +118,10 @@
         <!-- 如果需要自定义表格列模板,就把需要的自定义内容放到
         template中,不一定是按钮,可以是自定义的字符串的东西,
         也可以使用图标,circle圆形 -->
+        <!-- 任何数据和字符串拼接会自动的toString() -->
         <template slot-scope="scope">
           <el-button
+          @click="$router.push('/publish?id='+scope.row.id.toString())"
           size="mini"
           >编辑</el-button>
           <el-button

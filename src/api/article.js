@@ -34,3 +34,16 @@ export const deleteArticle = (articleId) => {
     url: `/mp/v1_0/articles/${articleId}`
   })
 }
+
+// 发布文章
+// 不传第二个参数默认是false,不存为草稿
+export const AddArticle = (data, draft = false) => {
+  return request({
+    method: 'POST',
+    url: '/mp/v1_0/articles',
+    params: {
+      draft: draft // 是否存为草稿(true存为草稿)
+    },
+    data // 请求体
+  })
+}
