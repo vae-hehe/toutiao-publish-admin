@@ -7,7 +7,7 @@
         <!-- :to="{name:'home'}"  to='/'-->
         <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
         <el-breadcrumb-item>内容管理</el-breadcrumb-item>
-        <el-breadcrumb-item>发布文章</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ $route.query.id ? '修改文章' : '发布文章' }}</el-breadcrumb-item>
       </el-breadcrumb>
       <!-- /面包屑导航 -->
     </div>
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { getArticleChannels, AddArticle } from '@/api/article'
+import { getArticleChannels, AddArticle, getArticle, updateArticle } from '@/api/article'
 export default {
   name: 'PublishIndex',
   components: {},
@@ -85,14 +85,27 @@ export default {
       // 封装请求方法
       // 请求提交表单
       // 处理响应结果
-      AddArticle(this.article, draft).then(res => {
-        console.log(res)
-        this.$message({
-          message: '成功',
-          type: 'success'
+
+      // 如果修改文章则执行修改操作,否则执行发布操作
+      const articleId = this.$route.query.id
+      if (articleId) {
+        updateArticle(articleId, this.article, draft).then(res => {
+          this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+          this.$router.push('/article')
         })
-        this.$router.push('/article')
-      })
+      } else {
+        AddArticle(this.article, draft).then(res => {
+          console.log(res)
+          this.$message({
+            message: `${draft ? '存入草稿' : '发布'}成功`,
+            type: 'success'
+          })
+          this.$router.push('/article')
+        })
+      }
     },
     // 编辑文章
     loadArticle () {
@@ -100,6 +113,11 @@ export default {
       // 邓庄请求方式
       // 请求获取方式
       // 模板绑定展示
+
+      // 展示编辑文章内容
+      getArticle(this.$route.query.id).then(res => {
+        this.article = res.data.data
+      })
     }
   }
 }
