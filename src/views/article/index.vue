@@ -14,7 +14,8 @@
     <el-form ref="form" :model="form" label-width="40px" size="mini">
         <el-form-item label="状态">
         <el-radio-group v-model="status">
-            <!-- el-radio 默认把label作为文本和选中之后的value值 -->
+            <!-- radio 默认把label作为文本和选中之后的value值 -->
+            <!-- lable不加: 就是 文本,我们要的是数据 就要加 : -->
             <el-radio :label="null">全部</el-radio>
             <el-radio :label="0">草稿</el-radio>
             <el-radio :label="1">待审核</el-radio>
@@ -175,6 +176,7 @@ export default {
       ],
       totalCount: 0, // 总数据条数
       pageSize: 20,
+      // axios 不会发送数据为 null, undefined 之类的数据
       status: null, // 查询文章的状态,不传就是全部
       loading: true,
       page: 1,
