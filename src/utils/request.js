@@ -1,11 +1,29 @@
 // 基于axios封装的请求模块
 
 import axios from 'axios'
+// 加载json-bigint
+// 会把超出js安全整数范围的数据转换成另一种类型为BigNumber的数据
+// 我们使用的时候要把这个数字转成字符串才可以 BingNumber.toString()
+import JSONbig from 'json-bigint'
 
 // 创建一个axios实例,说白了就是赋值了一个axios
 // 我们通过这个实例去发送请求,把需要的配置,配置给这个实例
 const request = axios.create({
-  baseURL: 'http://ttapi.research.itcast.cn/' // 请求的基础路径
+  baseURL: 'http://ttapi.research.itcast.cn/', // 请求的基础路径
+
+  // 定义后端返回的原始数据的处理
+  // 参数 data就是后端返回的原始数据(未经处理的JSON格式)
+  transformResponse: [function (data) {
+    // axios默认在内部使用JSON.parse来转换原始数据
+    try {
+      // 转换成功,将结果返回
+      return JSONbig.parse(data)
+    } catch (error) {
+      // 如果转换失败,进入这里
+      // 直接返回数据给请求使用
+      return data
+    }
+  }]
 })
 
 // 请求拦截器

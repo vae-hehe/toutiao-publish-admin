@@ -24,14 +24,19 @@
         </el-radio-group>
         </el-form-item>
         <el-form-item label="频道">
-        <el-select v-model="form.region" placeholder="请选择频道">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <!-- 双向绑定数据 -->
+        <el-select v-model="channelId" placeholder="请选择频道">
+            <!-- 默认在框中显示全部字符串 -->
+            <el-option label="全部" :value="null"></el-option>
+            <!-- 完成渲染频道输入框 -->
+            <el-option v-for="(channel,index) in channels" :key="index" :label="channel.name" :value="channel.id"></el-option>
         </el-select>
         </el-form-item>
         <el-form-item label="日期">
         <el-date-picker
-            v-model="form.date1"
+            v-model="rangeDate"
+            format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
             type="datetimerange"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
@@ -39,7 +44,7 @@
         </el-date-picker>
         </el-form-item>
         <el-form-item>
-        <el-button type="primary" @click="loadArticles(1)">查询</el-button>
+        <el-button type="primary" :disabled="loading" @click="loadArticles(1)">查询</el-button>
         </el-form-item>
     </el-form>
     <!-- /数据筛选表单 -->
@@ -61,6 +66,7 @@
     <el-table
       :data="articles"
       stripe
+      v-loading="loading"
       class="list-table"
       size="mini"
       style="width: 100%">
@@ -70,7 +76,7 @@
           <img
             v-if="scope.row.cover.images[0]"
             class="article-cover" :src="scope.row.cover.images[0]" alt="">
-          <!-- <img v-else class="article-cover" src="./no-cover.gif" alt=""> -->
+          <img v-else class="article-cover" src="./1.jpeg" alt="">
         </template>
       </el-table-column>
       <el-table-column
@@ -101,13 +107,14 @@
         <!-- 如果需要自定义表格列模板,就把需要的自定义内容放到
         template中,不一定是按钮,可以是自定义的字符串的东西,
         也可以使用图标,circle圆形 -->
-        <template>
+        <template slot-scope="scope">
           <el-button
           size="mini"
           >编辑</el-button>
           <el-button
             size="mini"
             type="danger"
+            @click="onDeleteArticle(scope.row.id)"
             >删除</el-button>
         </template>
       </el-table-column>
@@ -120,7 +127,9 @@
       layout="prev, pager, next"
       :total="totalCount"
       @current-change="oncurrentchange"
+      :disabled="loading"
       :page-size="pageSize"
+      :current-page.sync="page"
     >
     </el-pagination>
     <!-- /列表分页 -->
@@ -129,7 +138,7 @@
 </template>
 
 <script>
-import { getArticles } from '@/api/article'
+import { getArticles, getArticleChannels, deleteArticle } from '@/api/article'
 export default {
   name: 'ArticleIndex',
   components: {},
@@ -156,26 +165,41 @@ export default {
       ],
       totalCount: 0, // 总数据条数
       pageSize: 20,
-      status: null // 查询文章的状态,不传就是全部
+      status: null, // 查询文章的状态,不传就是全部
+      loading: true,
+      page: 1,
+      channels: [], // 频道列表
+      channelId: null,
+      rangeDate: null
     }
   },
   computed: {},
   watch: {},
   created () {
+    this.loadArticleChannels()
     this.loadArticles()
   },
   mounted () {},
   methods: {
     loadArticles (page = 1) {
+      // 展示加载中
+      this.loading = true
       getArticles({
         page,
         per_page: this.pageSize,
-        status: this.status
+        status: this.status,
+        channel_id: this.channelId,
+        begin_pubdate: this.rangeDate ? this.rangeDate[0] : null, // 开始时间
+        end_pubdate: this.rangeDate ? this.rangeDate[1] : null // 截止时间
       }).then(res => {
+        // 解构
         // total_count: totalCount ES6中的重命名,必须使用驼峰
         const { results, total_count: totalCount } = res.data.data
         this.articles = results
         this.totalCount = totalCount
+
+        // 关闭加载中loading
+        this.loading = false
       })
     },
     onSubmit () {
@@ -183,6 +207,37 @@ export default {
     },
     oncurrentchange (page) {
       this.loadArticles(page)
+    },
+    // 获取频道
+    loadArticleChannels () {
+      getArticleChannels().then(res => {
+        console.log(res)
+        this.channels = res.data.data.channels
+      })
+    },
+
+    onDeleteArticle (articleId) {
+      // 找到数据接口
+      // 封装请求方法
+      // 删除请求调用
+      // 处理响应结果
+      // js中能表示的整数范围是-2^53到2^53  安全整数范围
+      // 安装json-bigint 解决问题
+      this.$confirm('确认删除吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteArticle(articleId.toString()).then(res => {
+          // 删除成功 更新列表 获取页码
+          this.loadArticles(this.page)
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   }
 }
@@ -196,7 +251,7 @@ export default {
   margin-bottom: 20px;
 }
 .article-cover{
-  width: 100px;
+  width: 50px;
   background-size: cover;
 }
 </style>
