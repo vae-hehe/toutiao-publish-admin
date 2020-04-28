@@ -11,7 +11,7 @@
       </el-breadcrumb>
       <!-- /面包屑导航 -->
     </div>
-    <el-radio-group v-model="collect" @change="oncollectChange" size="mini" style="margin-bottom:20px">
+    <el-radio-group v-model="collect" @change="loadImages(1)" size="mini" style="margin-bottom:20px">
       <el-radio-button :label="false">全部</el-radio-button>
       <el-radio-button :label="true">收藏</el-radio-button>
     </el-radio-group>
@@ -21,9 +21,18 @@
       <el-col :lg="4" :md="6" :sm="6" :xs="12" v-for="(img, index) in images" :key="index" class="list">
         <div>
           <div class="mask">
+            <!-- 再次优化: 使用button代替i标签,因为button里面有加载的显示形式 -->
+            <!-- 显示 loading 形式 -->
+            <!-- 必须从img里面取出数据,不然加载的就是全部的数据,但是属性里面本来没有loading,需要自己添加 -->
+            <el-button type="warning" circle size="mini" :icon="img.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'"  @click="onCollected(img)" :loading="img.loading"></el-button>
+            <el-button type="danger" icon="el-icon-delete" circle size="mini" @click="ondeleteImage(img)" :loading="img.loading"></el-button>
+
+            <!-- 优化 -->
+            <!-- 点击的时候变换显示的图片 -->
+            <!-- <i :class="{'el-icon-star-on': img.is_collected, 'el-icon-star-off': !img.is_collected}" @click="onCollected(img.id, img.is_collected)"></i>
             <i v-if="img.is_collected === false" class="el-icon-star-off" :class="{isCollected: img.is_collected}" @click="onCollected(img.id, img.is_collected)"></i>
-            <i v-else class="el-icon-star-on" :class="{isCollected: img.is_collected}" @click="onCollected(img.id, img.is_collected)"></i>
-            <i class="el-icon-delete" @click="ondeleteImage(img.id)"></i>
+            <i v-else class="el-icon-star-on" :class="{isCollected: img.is_collected}" @click="onCollected(img.id, img.is_collected)"></i> -->
+            <!-- <i class="el-icon-delete" @click="ondeleteImage(img.id)"></i> -->
           </div>
           <el-image
           style="height: 100px"
@@ -34,6 +43,7 @@
       </el-col>
     </el-row>
     <!-- 分页 -->
+    <!-- 筛选之后,分页数据改变,但是页码没有变化 :current-page.sync="page" 处理 -->
     <el-pagination
       style="margin-top:20px"
       background
@@ -41,7 +51,7 @@
       :total="totalCount"
       :page-size="pageSize"
       :current-page.sync="page"
-      @current-change="loadImages(false)"
+      @current-change="onCurrentPage(1)"
     >
     </el-pagination>
   </el-card>
@@ -92,7 +102,7 @@ export default {
       uploadHeaders: {
         Authorization: `Bearer ${user.token}`
       },
-      page: 1,
+      page: 1, // 当前页码默认是1
       pageSize: 12, // 每页显示的图片的个数
       totalCount: 0 // 图片的总数
     }
@@ -100,25 +110,34 @@ export default {
   computed: {},
   watch: {},
   created () {
-    this.loadImages(false)
+    this.loadImages(1)
   },
   mounted () {},
   methods: {
-    loadImages (collect = false) {
+    loadImages (page = 1) {
+      // 重置高亮页码,防止数据和页码不对应
+      this.page = page
       getImages({
-        collect,
-        page: this.page,
+        collect: this.collect,
+        page,
         per_page: this.pageSize
       }).then(res => {
         console.log(res)
-        this.images = res.data.data.results
+        const results = res.data.data.results
+        // 遍历results 给每一img里面添加loading属性
+        results.forEach(img => {
+          // img对象里面本来没有loading数据
+          // 在每一个里面添加loading属性,来控制每一个 收藏按钮的 loading 状态
+          img.loading = false
+        })
+        this.images = results
         this.totalCount = res.data.data.total_count
       })
     },
     // 改成loadImages 直接调用
-    oncollectChange (value) {
-      this.loadImages(value)
-    },
+    // oncollectChange (value) {
+    //   this.loadImages(value)
+    // },
     onUploadSuccess () {
       // 关闭对话框
       this.dialogUploadVisible = false
@@ -127,12 +146,13 @@ export default {
       this.loadImages(false)
     },
     // 获取当前点击的页数
-    // onCurrentPage (page) {
-    //   this.loadImages(page)
-    // }
+    onCurrentPage (page) {
+      this.loadImages(this.page)
+    },
     // 删除图片
-    ondeleteImage (imageId) {
-      deleteImages(imageId).then(res => {
+    ondeleteImage (img) {
+      img.loading = true
+      deleteImages(img.id).then(res => {
         this.$confirm('确定删除这个图片吗?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -143,29 +163,40 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
+          img.loading = false
         }).catch(() => {
           this.$message({
             type: 'info',
             message: '已取消删除'
           })
+          img.loading = false
         })
       })
     },
     // 收藏图片
-    onCollected (imageId, isCollected) {
-      collectImages(imageId, !isCollected).then(res => {
-        if (isCollected === false) {
-          this.loadImages(false)
+    // 优化参数整体传img
+    onCollected (img) {
+      img.loading = true
+      collectImages(img.id, !img.is_collected).then(res => {
+        // 也可以这样写
+        // img.is_collected = !img.is_collected
+        if (img.is_collected === false) {
+          this.loadImages(this.page)
           this.$message({
             type: 'success',
             message: '收藏成功!'
           })
+
+          img.loading = false
         } else {
-          this.loadImages(false)
+          this.loadImages(this.page)
           this.$message({
             type: 'success',
             message: '取消收藏成功!'
           })
+
+          // 加载取消
+          img.loading = false
         }
       })
     }
@@ -179,11 +210,15 @@ export default {
   .mask {
     position: absolute;
     bottom: 5px;
-    width: 100%;
+    left: 5px;
+    right: 5px;
+    height: 27px;
     background: rgba(1, 1, 1, .3);
     z-index: 100000;
     display: flex;
     justify-content: space-evenly;
+    align-items: center;
+    color: yellow;
   }
 }
 </style>
