@@ -13,24 +13,24 @@
     <el-row :gutter="300">
       <el-col :xs="20" :sm="16" :md="16" :lg="12">
         <!-- 表单 -->
-        <el-form ref="user_form" :model="user" label-width="70px">
+        <el-form ref="user_form" :model="user" label-width="80px" :rules="formRules">
           <el-form-item label="编号">
             {{ user.id }}
           </el-form-item>
           <el-form-item label="手机">
             {{ user.mobile }}
           </el-form-item>
-          <el-form-item label="媒体名称">
-            <el-input v-model="user.name"></el-input>
+          <el-form-item label="媒体名称" prop="name">
+            <el-input v-model="user.name" placeholder="请输入媒体名称"></el-input>
           </el-form-item>
-          <el-form-item label="媒体介绍">
-            <el-input type="textarea" v-model="user.intro"></el-input>
+          <el-form-item label="媒体介绍" prop="intro">
+            <el-input type="textarea" v-model="user.intro" placeholder="请输入媒体介绍"></el-input>
           </el-form-item>
-          <el-form-item label="邮箱">
-            <el-input v-model="user.email"></el-input>
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="user.email" placeholder="请输入邮箱"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">保存设置</el-button>
+            <el-button type="primary" @click="onUserSetting">保存设置</el-button>
           </el-form-item>
         </el-form>
         <!-- /表单 -->
@@ -47,14 +47,36 @@
 </template>
 
 <script>
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, editUserProfile } from '@/api/user'
 export default {
   name: 'SettingsIndex',
   components: {},
   props: {},
   data () {
     return {
-      user: {}
+      user: {},
+      formRules: {
+        name: [
+          { required: true, message: '请输入媒体名称', tigger: 'blur' },
+          { min: 1, max: 7, message: '请输入在1到7位之间的名称', tigger: 'blur' }
+        ],
+        intro: [
+          { required: true, message: '请输入媒体介绍', tigger: 'blur' },
+          {
+            // 自定义规则
+            validator (valid, rule, callback) {
+              if (valid === '') {
+                callback(new Error('请输入媒体介绍'))
+              }
+              callback()
+            }
+          }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱地址', tigger: 'blur' },
+          { pattern: /^\w+@\w+(\.\w+)+$/, message: '请输入正确的邮箱地址', tigger: 'blur' }
+        ]
+      }
     }
   },
   computed: {},
@@ -70,8 +92,33 @@ export default {
         this.user = res.data.data
       })
     },
-    onSubmit () {
-      console.log(11)
+    onUserSetting () {
+      // 表单验证
+      this.$refs.user_form.validate(valid => {
+        if (!valid) {
+          // 验证失败
+          return
+        }
+        // 验证成功
+        const { name, intro, email } = this.user
+        editUserProfile({
+          name,
+          intro,
+          email
+        }).then(res => {
+          // console.log(res)
+          this.loadUser()
+          this.$message({
+            type: 'success',
+            message: '修改成功'
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '修改失败'
+          })
+        })
+      })
     }
   }
 }
