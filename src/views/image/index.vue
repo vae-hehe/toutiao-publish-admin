@@ -51,7 +51,7 @@
       :total="totalCount"
       :page-size="pageSize"
       :current-page.sync="page"
-      @current-change="onCurrentPage(1)"
+      @current-change="onCurrentPage"
     >
     </el-pagination>
   </el-card>
@@ -147,7 +147,7 @@ export default {
     },
     // 获取当前点击的页数
     onCurrentPage (page) {
-      this.loadImages(this.page)
+      this.loadImages(page)
     },
     // 删除图片
     ondeleteImage (img) {
@@ -163,14 +163,13 @@ export default {
             type: 'success',
             message: '删除成功!'
           })
-          img.loading = false
         }).catch(() => {
           this.$message({
             type: 'info',
             message: '已取消删除'
           })
-          img.loading = false
         })
+        img.loading = false
       })
     },
     // 收藏图片
