@@ -41,6 +41,7 @@
 import AppAside from './components/aside'
 // import AppHeader from './components/header'
 import { getUserProfile } from '@/api/user'
+import globalBus from '@/utils/global-bus'
 
 export default {
   name: 'LayoutIndex',
@@ -59,6 +60,15 @@ export default {
   watch: {},
   created () {
     this.loadUserProfile()
+
+    // 注册自定义事件
+    // 当事件发布之后,这个注册函数就会被调用
+    globalBus.$on('update-user', (data) => {
+      console.log('update-user', data)
+      // this.user = data 错误 对象之间赋值是引用的,这样赋值的时候会影响
+      this.user.name = data.name
+      this.user.photo = data.photo
+    })
   },
   mounted () {},
   methods: {

@@ -94,6 +94,8 @@
 import { getUserProfile, editUserProfile, editUserPhoto } from '@/api/user'
 import 'cropperjs/dist/cropper.css'
 import Cropper from 'cropperjs'
+import globalBus from '@/utils/global-bus'
+
 export default {
   name: 'SettingsIndex',
   components: {},
@@ -171,6 +173,8 @@ export default {
             message: '修改成功'
           })
           this.updateProfileLoading = false
+          // 发布通知,用户信息修改
+          globalBus.$emit('update-user', this.user)
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -252,6 +256,13 @@ export default {
           this.user.photo = window.URL.createObjectURL(file)
           // 关闭确定按钮的loading
           this.updatePhotoLoading = false
+
+          this.$message({
+            type: 'success',
+            message: '更新头像成功'
+          })
+          // 更新顶部的用户登录信息
+          globalBus.$emit('update-user', this.user)
           // 把服务端返回的数据进行展示有点慢
           // this.user.photo = res.data.data.photo
         })

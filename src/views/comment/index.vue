@@ -65,6 +65,7 @@
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="totalCount"
+      :disabled="onDisabled"
       background
     >
     </el-pagination>
@@ -83,7 +84,8 @@ export default {
       articles: [],
       page: 1, // 当前激活的页码
       pageSize: 10,
-      totalCount: 0
+      totalCount: 0,
+      onDisabled: false
     }
   },
   computed: {},
@@ -101,6 +103,7 @@ export default {
       this.loadArticles(page)
     },
     loadArticles (page = 1) {
+      this.onDisabled = true
       // 让分页组件激活的页码和请求数据的页码保持一致
       this.page = page
       getArticles({
@@ -115,6 +118,7 @@ export default {
         })
         this.articles = results
         this.totalCount = res.data.data.total_count
+        this.onDisabled = false
       })
     },
     onStatusChange (article) {
