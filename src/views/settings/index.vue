@@ -30,7 +30,7 @@
             <el-input v-model="user.email" placeholder="请输入邮箱"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onUserSetting">保存设置</el-button>
+            <el-button type="primary" @click="onUserSetting" :loading="updateProfileLoading">保存设置</el-button>
           </el-form-item>
         </el-form>
         <!-- /表单 -->
@@ -84,7 +84,7 @@
     </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="onUpdatePhoto">确 定</el-button>
+      <el-button type="primary" @click="onUpdatePhoto" :loading="updatePhotoLoading">确 定</el-button>
     </span>
   </el-dialog>
 </div>
@@ -132,7 +132,9 @@ export default {
       },
       dialogVisible: false, // 控制上传图片裁切预览的显示状态
       previewImage: '', // 预览图片
-      cropper: ''
+      cropper: '',
+      updatePhotoLoading: false, // loading
+      updateProfileLoading: false
     }
   },
   computed: {},
@@ -156,6 +158,7 @@ export default {
           return
         }
         // 验证成功
+        this.updateProfileLoading = true
         const { name, intro, email } = this.user
         editUserProfile({
           name,
@@ -163,16 +166,17 @@ export default {
           email
         }).then(res => {
           // console.log(res)
-          this.loadUser()
           this.$message({
             type: 'success',
             message: '修改成功'
           })
+          this.updateProfileLoading = false
         }).catch(() => {
           this.$message({
             type: 'info',
             message: '修改失败'
           })
+          this.updateProfileLoading = false
         })
       })
     },
@@ -232,7 +236,9 @@ export default {
       this.cropper.destroy()
     },
     onUpdatePhoto () {
+      // this.updatePhotoLoading = true
       this.cropper.getCroppedCanvas().toBlob(file => {
+        this.updatePhotoLoading = true
         console.log(file)
         const fd = new FormData()
         fd.append('photo', file)
@@ -244,6 +250,8 @@ export default {
           console.log(res)
           // 直接把裁切结果的文件对象 转为bolb数据 本地进行预览
           this.user.photo = window.URL.createObjectURL(file)
+          // 关闭确定按钮的loading
+          this.updatePhotoLoading = false
           // 把服务端返回的数据进行展示有点慢
           // this.user.photo = res.data.data.photo
         })
