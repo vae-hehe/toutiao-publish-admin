@@ -34,6 +34,7 @@ export const editUserProfile = data => {
   })
 }
 
+// 注意: data必须传递FromData对象
 // 编辑用户头像
 export const editUserPhoto = data => {
   return request({

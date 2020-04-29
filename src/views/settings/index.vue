@@ -74,12 +74,17 @@
     title="修改头像"
     :visible.sync="dialogVisible"
     append-to-body
+    @opened="onDialogOpend"
+    @closed="onDialogClosed"
   >
-    <!-- 需要预览图片 -->
-    <img width="150" :src="previewImage" alt="">
+    <!-- 用块级元素包裹图片 -->
+    <div class="preview-image-wrap">
+      <!-- 需要预览图片 -->
+      <img class="preview-image" :src="previewImage" alt="" ref="preview-image">
+    </div>
     <span slot="footer" class="dialog-footer">
       <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      <el-button type="primary" @click="dialogVisible = onUpdatePhoto">确 定</el-button>
     </span>
   </el-dialog>
 </div>
@@ -87,6 +92,8 @@
 
 <script>
 import { getUserProfile, editUserProfile, editUserPhoto } from '@/api/user'
+import 'cropperjs/dist/cropper.css'
+import Cropper from 'cropperjs'
 export default {
   name: 'SettingsIndex',
   components: {},
@@ -124,7 +131,8 @@ export default {
         ]
       },
       dialogVisible: false, // 控制上传图片裁切预览的显示状态
-      previewImage: '' // 预览图片
+      previewImage: '', // 预览图片
+      cropper: ''
     }
   },
   computed: {},
@@ -179,13 +187,83 @@ export default {
       this.dialogVisible = true
       // 解决选择相同文件 不触发change的事件问题
       this.$refs.file.value = ''
-      editUserPhoto(this.user.photo).then(res => {
-        console.log(res)
-        this.loadUser()
+    },
+    onDialogOpend () {
+      // 圖片裁切器必须基于img 进行初始化
+      // 注意: img必须是可见状态才能初始化
+      // 因为要在对话框中初始化裁切器,,所以在对话框完全打开的状态下初始化
+      // 获取图片 DOM 节点
+      const image = this.$refs['preview-image']
+
+      // 第1次初始化之后, 如果预览的裁切图片没有发生变化,裁切器默认默认不会更新
+      /**
+       * 两种方法
+       * 1. 裁切器.replace(url[, hasSameSize]) 方法
+       * 2. 销毁裁切器,重新初始化,性能更高
+       */
+      // 初始化裁切器
+      // 第二种
+      // if (this.cropper) {
+      //   this.cropper.replace(this.previewImage)
+      //   return
+      // }
+      this.cropper = new Cropper(image, {
+        // 裁切框的比例大小
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'none', // 不能移动画布
+        cropBoxResizable: false
+        // background: false
+
+        // 移动裁切器的时候会触发 crop 方法
+        // crop (event) {
+        //   console.log(event.detail.x)
+        //   console.log(event.detail.y)
+        //   console.log(event.detail.width)
+        //   console.log(event.detail.height)
+        //   console.log(event.detail.rotate)
+        //   console.log(event.detail.scaleX)
+        //   console.log(event.detail.scaleY)
+        // }
+      })
+    },
+    onDialogClosed () {
+      // 对话框关闭,销毁裁切器
+      this.cropper.destroy()
+    },
+    onUpdatePhoto () {
+      this.cropper.getCroppedCanvas().toBlob(file => {
+        console.log(file)
+        const fd = new FormData()
+        fd.append('photo', file)
+        // 请求提交fd 更新头像
+        editUserPhoto(fd).then(res => {
+          // 关闭对话框
+          this.dialogVisible = false
+          // 更新视图
+          console.log(res)
+          // 直接把裁切结果的文件对象 转为bolb数据 本地进行预览
+          this.user.photo = window.URL.createObjectURL(file)
+          // 把服务端返回的数据进行展示有点慢
+          // this.user.photo = res.data.data.photo
+        })
       })
     }
   }
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.preview-image-wrap {
+    /* Ensure the size of the image fit the container perfectly */
+  .preview-image {
+    img {
+      display: block;
+      /* This rule is very important, please don't ignore this */
+      // max-width: 100%;
+      height: 200px;
+    }
+  }
+}
+// git commit --amend -m "日志名字错误,提交修改的方法"
+</style>
