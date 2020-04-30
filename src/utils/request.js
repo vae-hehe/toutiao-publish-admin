@@ -8,6 +8,9 @@ import JSONbig from 'json-bigint'
 
 import router from '@/router'
 
+// 非组件模块可以这样加载使用 element 的 message 提示组件
+import { Message } from 'element-ui'
+
 // 创建一个axios实例,说白了就是赋值了一个axios
 // 我们通过这个实例去发送请求,把需要的配置,配置给这个实例
 const request = axios.create({
@@ -60,13 +63,27 @@ request.interceptors.response.use(function (response) {
   // 注意: 一定要把相应结果return,否则真正发请求的位置拿不到响应
   return response
 }, function (error) {
+  const status = error.response.status
   // 所有超出 2xx 的响应码进入这里
   console.log('异常')
-  if (error.response && error.response.status === 401) {
+  if (error.response && status === 401) {
     // 清除本地存储中的用户登录状态
     window.localStorage.removeItem('user')
     // 跳转到登录界面
     router.push('/login')
+    // this.$message
+    Message.error('登录状态无效,请重新登录')
+  } else if (status === 403) {
+    // 没有操作权限
+    Message({
+      type: 'warning',
+      message: '没有操作权限'
+    })
+  } else if (status === 400) {
+    // 客户端参数错误
+    Message.error('参数错误,请检查请求参数')
+  } else if (status >= 500) {
+    Message.error('服务端内部异常,请稍后重试')
   }
 
   return Promise.reject(error)
