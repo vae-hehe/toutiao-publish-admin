@@ -6,6 +6,8 @@ import axios from 'axios'
 // 我们使用的时候要把这个数字转成字符串才可以 BingNumber.toString()
 import JSONbig from 'json-bigint'
 
+import router from '@/router'
+
 // 创建一个axios实例,说白了就是赋值了一个axios
 // 我们通过这个实例去发送请求,把需要的配置,配置给这个实例
 const request = axios.create({
@@ -49,6 +51,26 @@ request.interceptors.request.use(
 )
 
 // 响应拦截器
+// token无效返回 401错误
+// Add a response interceptor
+request.interceptors.response.use(function (response) {
+  // 所有响应码为 2xx 的响应会进入这里
+
+  // response 是响应数据
+  // 注意: 一定要把相应结果return,否则真正发请求的位置拿不到响应
+  return response
+}, function (error) {
+  // 所有超出 2xx 的响应码进入这里
+  console.log('异常')
+  if (error.response && error.response.status === 401) {
+    // 清除本地存储中的用户登录状态
+    window.localStorage.removeItem('user')
+    // 跳转到登录界面
+    router.push('/login')
+  }
+
+  return Promise.reject(error)
+})
 
 // 导出请求方法
 export default request
