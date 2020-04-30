@@ -27,8 +27,34 @@
           <el-radio :label="0">无图</el-radio>
           <el-radio :label="-1">自动</el-radio>
         </el-radio-group>
+        <!--
+          我们需要把选择的封面图片的地址方到 article.cover.images 数组中
+
+          当给事件处理函数传递了自定义参数以后,就无法得到原本的那个数据参数了
+          如果想要在事件处理函数自定义传参之后还想得到原来的事件本身的参数,则手动指定$event,它就代表本身的参数,必须是$event
+
+          在组件上使用v-model
+          当给子组件提供的数据既要使用还要修改的时候,此时可以使用v-model简化数据绑定
+          v-model="article.cover.images[index]"
+          给子组件传递了名字叫value的数据
+            :value="article.cover.images[index]"
+          默认监听input事件,当事件发生,绑定数据 = 事件参数
+            @input="article.cover.images[index]" = 事件参数
+
+          注意: v-model只是简写了而已,本质还是父子组件通信
+        -->
         <template v-if="article.cover.type > 0">
-          <upload-cover v-for="cover in article.cover.type" :key="cover"></upload-cover>
+          <upload-cover
+            v-for="(cover, index) in article.cover.type"
+            :key="index"
+            v-model="article.cover.images[index]"
+          ></upload-cover>
+          <!-- <upload-cover
+            v-for="(cover, index) in article.cover.type"
+            :key="index"
+            :cover-image="article.cover.images[index]"
+            @update-cover="onUpdateCover(index, $event)"
+          ></upload-cover> -->
         </template>
       </el-form-item>
       <el-form-item label="频道" prop="channel_id">
@@ -87,7 +113,7 @@ export default {
         title: '',
         content: '', // 文章内容
         cover: {
-          type: 0, // 封面的类型 -1,0,1,3
+          type: 1, // 封面的类型 -1,0,1,3,默认选中单图
           images: [] // 封面图片的地址
         },
         channel_id: null
@@ -221,6 +247,10 @@ export default {
       getArticle(this.$route.query.id).then(res => {
         this.article = res.data.data
       })
+    },
+    onUpdateCover (index, url) {
+      // console.log('onUpdateCover', url)
+      this.article.cover.images[index] = url
     }
   }
 }
