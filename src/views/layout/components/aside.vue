@@ -1,9 +1,10 @@
 <template>
     <!-- <img src="" alt=""> -->
     <!-- el-menu 的index不能重复 ,确保唯一即可 -->
+    <!-- default-active 当前激活菜单的index,实现动态激活就是绑定当前路径 -->
     <el-menu
       class="nav-menu"
-      default-active="/"
+      :default-active="$route.path"
       background-color="#002033"
       text-color="#fff"
       active-text-color="#ffd04b"
