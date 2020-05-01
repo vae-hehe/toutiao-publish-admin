@@ -12,7 +12,7 @@
     </div>
     <!-- tab栏 -->
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-      <el-tab-pane label="用户管理" name="first" @tab-click="loadFans">
+      <el-tab-pane label="粉丝列表" name="first" @tab-click="loadFans">
         <el-row :gutter="10">
           <el-col :lg="4" :md="6" :sm="6" :xs="12" v-for="(item,index) in fansList" :key="index" style="padding-top:5px">
             <div  class="fans-list">
@@ -33,7 +33,7 @@
         >
         </el-pagination>
       </el-tab-pane>
-      <el-tab-pane label="配置管理" name="second">
+      <el-tab-pane label="粉丝画像" name="second">
         <!-- 图表设置 -->
         <!-- 1. 为 ECharts 准备一个具备大小（宽高）的 DOM -->
         <div ref="main" style="width: 600px;height:400px;"></div>
