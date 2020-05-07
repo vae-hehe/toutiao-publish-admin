@@ -1,21 +1,34 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+// 路由懒加载
+// 分成独立的代码块 chunk
+// /* webpackChunkName: "group-foo"*/ 有这个名字的就是在一个组内,只用一个模块加载就可以了
+const Login = () => import('@/views/login/')
+const Home = () => import('@/views/home/')
+const Layout = () => import('@/views/layout/')
+const Article = () => import(/* webpackChunkName: "group-foo" */ '@/views/article/')
+const Publish = () => import('@/views/publish/')
+const Image = () => import('@/views/image/')
+const Comment = () => import(/* webpackChunkName: "group-foo" */ '@/views/comment/')
+const Settings = () => import('@/views/settings/')
+const Fans = () => import(/* webpackChunkName: "group-foo" */ '@/views/fans/')
+
 // 在vue-cli中创建的项目 @ 表示src
 // 它是src项目的路径别名
 // 好处: 不受当前路径影响
 // 注意: @后面就是src路径,后面 别忘了写/
 // 建议: 凡是需要路径查找的就使用@
-// 如果加在的资源在当前路径资源下,就在当前目录下,正常写
-import Login from '@/views/login/'
-import Home from '@/views/home/'
-import Layout from '@/views/layout/'
-import Article from '@/views/article/'
-import Publish from '@/views/publish/'
-import Image from '@/views/image/'
-import Comment from '@/views/comment/'
-import Settings from '@/views/settings/'
-import Fans from '@/views/fans/'
+// 如果加载的资源在当前路径资源下,就在当前目录下,正常写
+// import Login from '@/views/login/'
+// import Home from '@/views/home/'
+// import Layout from '@/views/layout/'
+// import Article from '@/views/article/'
+// import Publish from '@/views/publish/'
+// import Image from '@/views/image/'
+// import Comment from '@/views/comment/'
+// import Settings from '@/views/settings/'
+// import Fans from '@/views/fans/'
 
 Vue.use(VueRouter)
 
