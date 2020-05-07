@@ -154,20 +154,21 @@ export default {
     },
     onUserSetting () {
       // 表单验证
-      this.$refs.user_form.validate(valid => {
+      this.$refs.user_form.validate(async valid => {
         if (!valid) {
           // 验证失败
           return
         }
         // 验证成功
         this.updateProfileLoading = true
-        const { name, intro, email } = this.user
-        editUserProfile({
-          name,
-          intro,
-          email
-        }).then(res => {
-          // console.log(res)
+
+        try {
+          const { name, intro, email } = this.user
+          const res = await editUserProfile({
+            name,
+            intro,
+            email
+          })
           this.$message({
             type: 'success',
             message: '修改成功'
@@ -175,13 +176,13 @@ export default {
           this.updateProfileLoading = false
           // 发布通知,用户信息修改
           globalBus.$emit('update-user', this.user)
-        }).catch(() => {
+        } catch (err) {
           this.$message({
             type: 'info',
             message: '修改失败'
           })
           this.updateProfileLoading = false
-        })
+        }
       })
     },
     onFileChange () {
@@ -239,34 +240,44 @@ export default {
       // 对话框关闭,销毁裁切器
       this.cropper.destroy()
     },
-    onUpdatePhoto () {
-      // this.updatePhotoLoading = true
-      this.cropper.getCroppedCanvas().toBlob(file => {
-        this.updatePhotoLoading = true
-        console.log(file)
-        const fd = new FormData()
-        fd.append('photo', file)
-        // 请求提交fd 更新头像
-        editUserPhoto(fd).then(res => {
-          // 关闭对话框
-          this.dialogVisible = false
-          // 更新视图
-          console.log(res)
-          // 直接把裁切结果的文件对象 转为bolb数据 本地进行预览
-          this.user.photo = window.URL.createObjectURL(file)
-          // 关闭确定按钮的loading
-          this.updatePhotoLoading = false
 
-          this.$message({
-            type: 'success',
-            message: '更新头像成功'
-          })
-          // 更新顶部的用户登录信息
-          globalBus.$emit('update-user', this.user)
-          // 把服务端返回的数据进行展示有点慢
-          // this.user.photo = res.data.data.photo
+    // 封装 Promise
+    // 1.给函数起一个名字
+    getCroppedCanvas () {
+      // 2.返回new 的 Promise 对象
+      return new Promise((resolve, reject) => {
+        // 3.执行异步操作
+        this.cropper.getCroppedCanvas().toBlob(file => {
+          // 成功
+          resolve(file)
         })
       })
+    },
+    async onUpdatePhoto () {
+      // this.updatePhotoLoading = true
+      const file = await this.getCroppedCanvas()
+      this.updatePhotoLoading = true
+      const fd = new FormData()
+      fd.append('photo', file)
+      // 请求提交fd 更新头像
+      const res = await editUserPhoto(fd)
+      // 关闭对话框
+      this.dialogVisible = false
+      // 更新视图
+      console.log(res)
+      // 直接把裁切结果的文件对象 转为bolb数据 本地进行预览
+      this.user.photo = window.URL.createObjectURL(file)
+      // 关闭确定按钮的loading
+      this.updatePhotoLoading = false
+
+      this.$message({
+        type: 'success',
+        message: '更新头像成功'
+      })
+      // 更新顶部的用户登录信息
+      globalBus.$emit('update-user', this.user)
+      // 把服务端返回的数据进行展示有点慢
+      // this.user.photo = res.data.data.photo
     }
   }
 }
@@ -275,6 +286,7 @@ export default {
 <style scoped lang="less">
 .preview-image-wrap {
     /* Ensure the size of the image fit the container perfectly */
+    height: 200px;
   .preview-image {
     img {
       display: block;

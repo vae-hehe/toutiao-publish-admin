@@ -107,9 +107,13 @@ export default {
 </script>
 
 <style scoped lang="less">
+.upload-cover {
+  display: inline-block;
+  margin-right: 10px;
+}
 .cover-wrap {
     width: 120px;
-    height: 120px;
+    height: 150px;
     border: 1px solid #ccc;
     .cover-image {
         width: 120px;

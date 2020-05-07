@@ -120,25 +120,23 @@ export default {
   },
   mounted () {},
   methods: {
-    loadImages (page = 1) {
+    async loadImages (page = 1) {
       // 重置高亮页码,防止数据和页码不对应
       this.page = page
-      getImages({
+      const res = await getImages({
         collect: this.collect,
         page,
         per_page: this.pageSize
-      }).then(res => {
-        console.log(res)
-        const results = res.data.data.results
-        // 遍历results 给每一img里面添加loading属性
-        results.forEach(img => {
-          // img对象里面本来没有loading数据
-          // 在每一个里面添加loading属性,来控制每一个 收藏按钮的 loading 状态
-          img.loading = false
-        })
-        this.images = results
-        this.totalCount = res.data.data.total_count
       })
+      const results = res.data.data.results
+      // 遍历results 给每一img里面添加loading属性
+      results.forEach(img => {
+        // img对象里面本来没有loading数据
+        // 在每一个里面添加loading属性,来控制每一个 收藏按钮的 loading 状态
+        img.loading = false
+      })
+      this.images = results
+      this.totalCount = res.data.data.total_count
     },
     // 改成loadImages 直接调用
     // oncollectChange (value) {
@@ -156,27 +154,26 @@ export default {
       this.loadImages(page)
     },
     // 删除图片
-    ondeleteImage (img) {
+    async ondeleteImage (img) {
       img.loading = true
-      deleteImages(img.id).then(res => {
-        this.$confirm('确定删除这个图片吗?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.loadImages(this.page)
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
+      const res = await deleteImages(img.id)
+      this.$confirm('确定删除这个图片吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loadImages(this.page)
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
         })
-        img.loading = false
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
+      img.loading = false
     },
     // 收藏图片
     // 优化参数整体传img

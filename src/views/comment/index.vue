@@ -102,37 +102,33 @@ export default {
       // 页码改变,加载页码指定数据
       this.loadArticles(page)
     },
-    loadArticles (page = 1) {
+    async loadArticles (page = 1) {
       this.onDisabled = true
       // 让分页组件激活的页码和请求数据的页码保持一致
       this.page = page
-      getArticles({
+      const res = await getArticles({
         response_type: 'comment',
         page,
         per_page: this.pageSize
-      }).then(res => {
-        console.log(res)
-        const { results } = res.data.data
-        results.forEach(article => {
-          article.statusDisabled = false
-        })
-        this.articles = results
-        this.totalCount = res.data.data.total_count
-        this.onDisabled = false
       })
+      const { results } = res.data.data
+      results.forEach(article => {
+        article.statusDisabled = false
+      })
+      this.articles = results
+      this.totalCount = res.data.data.total_count
+      this.onDisabled = false
     },
-    onStatusChange (article) {
+    async onStatusChange (article) {
       // 禁用开关,防止多次点击
       article.statusDisabled = true
       // 请求提交修改
-      updateCommentStatus(article.id.toString(), article.comment_status).then(res => {
-        console.log(res)
-        // 启用开关
-        article.statusDisabled = false
-        this.$message({
-          type: 'success',
-          message: article.comment_status ? '开启文章评论状态' : '关闭文章评论状态'
-        })
+      const res = await updateCommentStatus(article.id.toString(), article.comment_status)
+      // 启用开关
+      article.statusDisabled = false
+      this.$message({
+        type: 'success',
+        message: article.comment_status ? '开启文章评论状态' : '关闭文章评论状态'
       })
     }
   }

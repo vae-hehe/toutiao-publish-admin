@@ -43,7 +43,7 @@
 
           注意: v-model只是简写了而已,本质还是父子组件通信
         -->
-        <template v-if="article.cover.type > 0">
+        <div v-if="article.cover.type > 0">
           <upload-cover
             v-for="(cover, index) in article.cover.type"
             :key="index"
@@ -55,7 +55,7 @@
             :cover-image="article.cover.images[index]"
             @update-cover="onUpdateCover(index, $event)"
           ></upload-cover> -->
-        </template>
+        </div>
       </el-form-item>
       <el-form-item label="频道" prop="channel_id">
         <el-select v-model="article.channel_id" placeholder="请选择频道">
@@ -202,7 +202,7 @@ export default {
     },
     onPublish (draft = false) {
       // 验证表单
-      this.$refs['publish-form'].validate(valid => {
+      this.$refs['publish-form'].validate(async valid => {
         // 验证失败,停止提交表单
         if (!valid) {
           return
@@ -217,23 +217,20 @@ export default {
         // 如果修改文章则执行修改操作,否则执行发布操作
         const articleId = this.$route.query.id
         if (articleId) {
-          updateArticle(articleId, this.article, draft).then(res => {
-            this.$message({
-              message: '修改成功',
-              type: 'success'
-            })
-            this.$router.push('/article')
+          const res = await updateArticle(articleId, this.article, draft)
+          this.$message({
+            message: '修改成功',
+            type: 'success'
           })
-        } else {
-          AddArticle(this.article, draft).then(res => {
-            console.log(res)
-            this.$message({
-              message: `${draft ? '存入草稿' : '发布'}成功`,
-              type: 'success'
-            })
-            this.$router.push('/article')
-          })
+          this.$router.push('/article')
+          return
         }
+        const res = await AddArticle(this.article, draft)
+        this.$message({
+          message: `${draft ? '存入草稿' : '发布'}成功`,
+          type: 'success'
+        })
+        this.$router.push('/article')
       })
     },
     // 编辑文章

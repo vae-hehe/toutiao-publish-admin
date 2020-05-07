@@ -87,8 +87,6 @@ export default {
       // 表单验证
       // validate是异步的
       this.$refs['login-form'].validate((valid, err) => {
-        console.log(valid)
-        console.log(err)
         if (!valid) {
           // 表单验证失败
           return
@@ -97,7 +95,7 @@ export default {
         this.login()
       })
     },
-    login () {
+    async login () {
       // 获取表单数据
       // const user = this.user
 
@@ -109,39 +107,37 @@ export default {
       // 2.实际工作中 ,接口非常容易变动, 改起来麻烦
       // 建议的做法是把所有请求都封装成函数然后统一的组织到模块中进行管理
       // 这样做的好处是: 管理维护更方便,便于重用
-      login(this.user)
-        .then(res => {
-          // 登陆成功
-          console.log(res)
-          this.$message({
-            message: '登陆成功',
-            type: 'success'
-          })
-
-          // 关闭loading
-          this.loginLoading = false
-
-          // 将接口返回的用户相关数据,存储到本地存储中,方便应用数据共享
-          // 本地存储只能存字符串
-          // 存数组格式,串成Json
-          window.localStorage.setItem('user', JSON.stringify(res.data.data))
-
-          // 跳转到首页
-          // this.$router.push('/')
-
-          // 根据名字跳转
-          this.$router.push({
-            name: 'home'
-          })
+      try {
+        const res = await login(this.user)
+        // 登陆成功
+        this.$message({
+          message: '登陆成功',
+          type: 'success'
         })
-        .catch(err => {
-          // 登录失败
-          console.log(err)
-          this.$message.error('登录失败,手机号或验证码错误')
 
-          // 关闭loading
-          this.loginLoading = false
+        // 关闭loading
+        this.loginLoading = false
+
+        // 将接口返回的用户相关数据,存储到本地存储中,方便应用数据共享
+        // 本地存储只能存字符串
+        // 存数组格式,串成Json
+        window.localStorage.setItem('user', JSON.stringify(res.data.data))
+
+        // 跳转到首页
+        // this.$router.push('/')
+
+        // 根据名字跳转
+        this.$router.push({
+          name: 'home'
         })
+      } catch (err) {
+        // 登录失败
+        console.log(err)
+        this.$message.error('登录失败,手机号或验证码错误')
+
+        // 关闭loading
+        this.loginLoading = false
+      }
     }
   }
 }

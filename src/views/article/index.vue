@@ -195,26 +195,25 @@ export default {
   },
   mounted () {},
   methods: {
-    loadArticles (page = 1) {
+    async loadArticles (page = 1) {
       // 展示加载中
       this.loading = true
-      getArticles({
+      const res = await getArticles({
         page,
         per_page: this.pageSize,
         status: this.status,
         channel_id: this.channelId,
         begin_pubdate: this.rangeDate ? this.rangeDate[0] : null, // 开始时间
         end_pubdate: this.rangeDate ? this.rangeDate[1] : null // 截止时间
-      }).then(res => {
-        // 解构
-        // total_count: totalCount ES6中的重命名,必须使用驼峰
-        const { results, total_count: totalCount } = res.data.data
-        this.articles = results
-        this.totalCount = totalCount
-
-        // 关闭加载中loading
-        this.loading = false
       })
+      // 解构
+      // total_count: totalCount ES6中的重命名,必须使用驼峰
+      const { results, total_count: totalCount } = res.data.data
+      this.articles = results
+      this.totalCount = totalCount
+
+      // 关闭加载中loading
+      this.loading = false
     },
     // 分页的函数, 也可以直接调用 loadArticles() 直接渲染
     // @current-change="oncurrentchange" 修改成调用 loadArticles()

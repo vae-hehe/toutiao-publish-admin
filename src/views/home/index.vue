@@ -1,6 +1,6 @@
 <template>
 <div class="home">
-  <p>哈哈哈哈哈</p>
+  <span>就是他</span>
 </div>
 </template>
 
@@ -27,5 +27,7 @@ export default {
   background: url(./2.jpg) no-repeat;
   background-size: cover;
   color: rgb(248, 47, 255);
+  font-size: 30px;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
 </style>

@@ -99,17 +99,15 @@ export default {
       console.log(tab, event)
     },
     // 获取粉丝列表
-    loadFans (page = 1) {
+    async loadFans (page = 1) {
       this.onDisabled = true
-      getFans({
+      const res = await getFans({
         page, // 当前在第几页,默认是第一页
         per_page: this.pageSize // 每页有多少数据
-      }).then(res => {
-        console.log(res)
-        this.fansList = res.data.data.results
-        this.totalCount = res.data.data.total_count
-        this.onDisabled = false
       })
+      this.fansList = res.data.data.results
+      this.totalCount = res.data.data.total_count
+      this.onDisabled = false
     }
   }
 }
